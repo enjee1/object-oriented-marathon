@@ -1,5 +1,3 @@
-# require_relative "cage"
-
 class Zoo
   attr_reader :cages, :employees
 
@@ -7,14 +5,11 @@ class Zoo
     @name = name
     @opening_date = opening_date
     @closing_date = closing_date
-    @cages = []
     @employees = []
-    build_cages
-  end
-
-  def build_cages
-    10.times do
-      @cages << Cage.new
+    @cages = [].tap do |cages|
+      10.times do
+        cages << Cage.new
+      end
     end
   end
 
@@ -31,9 +26,9 @@ class Zoo
   end
 
   def add_animal(animal)
-    open_cage_index = @cages.index { |cage| cage.animal.nil? }
-    if !open_cage_index.nil?
-      @cages[open_cage_index].animal = animal
+    empty_cage = @cages.find { |cage| cage.empty? }
+    if !empty_cage.nil?
+      empty_cage.animal = animal
     else
       "Your zoo is already at capacity!"
     end
@@ -41,14 +36,15 @@ class Zoo
 
   def visit
     message_from_zoo = ""
+    @employees.each do |employee|
+      message_from_zoo << employee.greet + "\n"
+    end
+
     @cages.each do |cage|
       if !cage.animal.nil?
-        message_from_zoo += "#{cage.animal.speak}\n"
+        message_from_zoo << cage.animal.speak + "\n" if !cage.empty?
       end
     end
-    @employees.each do |employee|
-      message_from_zoo += "#{employee.greet}\n"
-    end 
     message_from_zoo
   end
 end
